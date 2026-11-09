@@ -69,7 +69,10 @@
   align-items: center;
   gap: 2px;
   height: 100%;
+  position: relative;
+  z-index: 2;
   -webkit-app-region: no-drag;
+  pointer-events: auto;
 }
 
 .titlebar__toggle {
@@ -79,6 +82,8 @@
   height: 24px;
   color: var(--text-dim);
   font-size: 13px;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
   transition:
     color var(--dur) var(--ease),
     background var(--dur) var(--ease);
@@ -93,6 +98,10 @@
   display: flex;
   height: 100%;
   margin-left: 6px;
+  position: relative;
+  z-index: 3;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
 }
 
 .window-control {

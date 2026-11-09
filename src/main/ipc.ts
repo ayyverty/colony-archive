@@ -391,24 +391,27 @@ export function registerIpc(): void {
     }
   })
 
-  handle(IPC.windowMinimize, () => {
-    focusedWindow()?.minimize()
+  handle(IPC.windowMinimize, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender) ?? focusedWindow()
+    window?.minimize()
     return null
   })
-  handle(IPC.windowToggleMaximize, () => {
-    const window = focusedWindow()
+  handle(IPC.windowToggleMaximize, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender) ?? focusedWindow()
     if (!window) return { maximized: false }
     if (window.isMaximized()) window.unmaximize()
     else window.maximize()
     return { maximized: window.isMaximized() }
   })
-  handle(IPC.windowClose, () => {
-    focusedWindow()?.close()
+  handle(IPC.windowClose, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender) ?? focusedWindow()
+    window?.close()
     return null
   })
-  handle(IPC.windowForceClose, () => {
+  handle(IPC.windowForceClose, (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender) ?? focusedWindow()
     allowWindowClose()
-    focusedWindow()?.close()
+    window?.close()
     return null
   })
 }
