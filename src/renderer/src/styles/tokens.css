@@ -1,0 +1,76 @@
+:root {
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --titlebar-h: 36px;
+  --statusbar-h: 26px;
+  --dur: 120ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-0: #070a0d;
+  --bg-1: #0b1015;
+  --bg-2: #0e151b;
+  --bg-3: #121b22;
+  --bg-hover: #142029;
+  --line: #1a252e;
+  --line-strong: #26343f;
+  --text: #d5e1e9;
+  --text-dim: #8b9aa8;
+  --text-faint: #5b6b78;
+  --accent: #4af0d4;
+  --accent-strong: #8bf8e6;
+  --accent-dim: #2a9e8f;
+  --accent-soft: rgba(74, 240, 212, 0.09);
+  --accent-glow: rgba(74, 240, 212, 0.28);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 107, 107, 0.1);
+  --warn: #ffb547;
+  --warn-soft: rgba(255, 181, 71, 0.1);
+  --selection: rgba(74, 240, 212, 0.18);
+  --scanline: rgba(255, 255, 255, 0.022);
+  --cm-active-line: rgba(255, 255, 255, 0.018);
+  --cm-selection: rgba(74, 240, 212, 0.16);
+  --cm-heading: #8bf8e6;
+  --cm-keyword: #7fd6ff;
+  --cm-string: #a9e6a0;
+  --cm-marker: #4c6270;
+  --preview-code-bg: #090e12;
+  --preview-quote: #2a9e8f;
+  --overlay: rgba(3, 6, 9, 0.66);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg-0: #e7edf1;
+  --bg-1: #f4f8fa;
+  --bg-2: #fbfdfe;
+  --bg-3: #edf3f6;
+  --bg-hover: #e4edf2;
+  --line: #d1dde5;
+  --line-strong: #b3c4d0;
+  --text: #16212a;
+  --text-dim: #4c5d6a;
+  --text-faint: #7b8d9a;
+  --accent: #0f9c8a;
+  --accent-strong: #0a7c6e;
+  --accent-dim: #4bbdac;
+  --accent-soft: rgba(15, 156, 138, 0.08);
+  --accent-glow: rgba(15, 156, 138, 0.16);
+  --danger: #b93b30;
+  --danger-soft: rgba(185, 59, 48, 0.08);
+  --warn: #9a6400;
+  --warn-soft: rgba(154, 100, 0, 0.09);
+  --selection: rgba(15, 156, 138, 0.15);
+  --scanline: rgba(12, 44, 54, 0.03);
+  --cm-active-line: rgba(15, 60, 80, 0.035);
+  --cm-selection: rgba(15, 156, 138, 0.15);
+  --cm-heading: #0a7c6e;
+  --cm-keyword: #0b6f92;
+  --cm-string: #3c6f34;
+  --cm-marker: #93a6b1;
+  --preview-code-bg: #e9f0f4;
+  --preview-quote: #0f9c8a;
+  --overlay: rgba(226, 234, 239, 0.72);
+}

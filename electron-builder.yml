@@ -1,0 +1,31 @@
+appId: dev.avery.colonyarchive
+productName: RimCodex
+copyright: Copyright © 2026 Avery
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**/*
+  - package.json
+asar: true
+compression: normal
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: RimCodex
+  artifactName: ${productName}-${version}-setup.${ext}
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}

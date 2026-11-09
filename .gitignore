@@ -1,0 +1,11 @@
+# Dependencies and build output
+node_modules/
+out/
+dist/
+
+# Local env and OS noise
+.env
+.env.*
+.DS_Store
+Thumbs.db
+*.log

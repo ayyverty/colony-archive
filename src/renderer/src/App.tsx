@@ -1,0 +1,498 @@
+import { useEffect, useRef, useState } from 'react'
+import type { ResolvedTheme } from '@shared/types'
+import { useArchiveStore, dirtyPaths } from './state/store'
+import { call, errorMessage } from './lib/api'
+import { applyTheme, onSystemThemeChange, prefersReducedMotion, resolveTheme } from './lib/theme'
+import { INFOBOX_TEMPLATE, STUB_TEMPLATE } from './lib/templates'
+import { TitleBar } from './components/TitleBar'
+import { Sidebar } from './components/Sidebar'
+import { EditorPane } from './components/EditorPane'
+import { PreviewPane } from './components/PreviewPane'
+import { Splitter } from './components/Splitter'
+import { StatusBar } from './components/StatusBar'
+import { ContextMenu } from './components/ContextMenu'
+import { DialogHost } from './components/Dialog'
+import { ToastStack } from './components/ToastStack'
+import { BootSequence } from './components/BootSequence'
+import { CommandPalette } from './components/CommandPalette'
+import { ConsoleBar } from './components/ConsoleBar'
+import { SubWindow } from './components/SubWindow'
+import { BacklinksPanel } from './components/panels/BacklinksPanel'
+import { DiagnosticsPanel } from './components/panels/DiagnosticsPanel'
+import { TimelinePanel } from './components/panels/TimelinePanel'
+import { GraphPanel } from './components/panels/GraphPanel'
+import { HistoryPanel } from './components/panels/HistoryPanel'
+import { TemplatesPanel } from './components/panels/TemplatesPanel'
+import { ExportPanel } from './components/panels/ExportPanel'
+import { IndexScreen } from './components/IndexScreen'
+import { DiagnosticsScreen } from './components/DiagnosticsScreen'
+import { GraphScreen } from './components/GraphScreen'
+import { OperatorManual } from './components/OperatorManual'
+import { IdleScreen } from './components/IdleScreen'
+import { TemplatePickerDialog } from './components/TemplatePickerDialog'
+import { MountSequence } from './components/MountSequence'
+import { ColonyBanner } from './components/ColonyBanner'
+import { TimelineScreen } from './components/TimelineScreen'
+import { InboxPanel } from './components/panels/InboxPanel'
+import { SUBSYSTEMS } from './lib/subsystems'
+
+interface PanelMeta {
+  title: string
+  subtitle: string
+  program: string
+  width: number
+}
+
+const PANEL_META: Record<string, PanelMeta> = {
+  backlinks: { title: 'Backlinks', subtitle: 'references', program: SUBSYSTEMS.backlinks, width: 390 },
+  diagnostics: { title: 'Diagnostics', subtitle: 'self-test', program: SUBSYSTEMS.diagnostics, width: 380 },
+  timeline: { title: 'Timeline', subtitle: 'chronology', program: SUBSYSTEMS.timeline, width: 400 },
+  graph: { title: 'Relationship graph', subtitle: 'link topology', program: SUBSYSTEMS.graph, width: 720 },
+  history: { title: 'Version history', subtitle: '.history', program: SUBSYSTEMS.history, width: 400 },
+  templates: { title: 'Templates', subtitle: '_templates', program: SUBSYSTEMS.templates, width: 390 },
+  export: { title: 'Export', subtitle: 'html / pdf', program: SUBSYSTEMS.export, width: 380 },
+  inbox: { title: 'Inbox', subtitle: 'dispatches', program: 'INBOX.SVC', width: 420 }
+}
+
+const PANEL_ORDER = Object.keys(PANEL_META)
+
+function panelBody(id: string) {
+  switch (id) {
+    case 'backlinks':
+      return <BacklinksPanel />
+    case 'diagnostics':
+      return <DiagnosticsPanel />
+    case 'timeline':
+      return <TimelinePanel />
+    case 'graph':
+      return <GraphPanel />
+    case 'history':
+      return <HistoryPanel />
+    case 'templates':
+      return <TemplatesPanel />
+    case 'export':
+      return <ExportPanel />
+    case 'inbox':
+      return <InboxPanel />
+    default:
+      return null
+  }
+}
+
+function panelOrigin(id: string): { x: number; y: number } {
+  const index = Math.max(0, PANEL_ORDER.indexOf(id))
+  const meta = PANEL_META[id]
+  const width = Math.min(meta.width, Math.max(280, window.innerWidth - 40))
+  return {
+    x: Math.max(14, window.innerWidth - width - 38 - (index % 4) * 22),
+    y: 56 + (index % 4) * 24
+  }
+}
+
+export default function App() {
+  const theme = useArchiveStore((state) => state.theme)
+  const previewVisible = useArchiveStore((state) => state.previewVisible)
+  const panels = useArchiveStore((state) => state.panels)
+  const focusMode = useArchiveStore((state) => state.focusMode)
+  const workspace = useArchiveStore((state) => state.workspace)
+  const rootPath = useArchiveStore((state) => state.rootPath)
+  const newPagePickerDir = useArchiveStore((state) => state.newPagePickerDir)
+  const closeNewPagePicker = useArchiveStore((state) => state.closeNewPagePicker)
+  const display = useArchiveStore((state) => state.display)
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme('system'))
+  const [maximized, setMaximized] = useState(false)
+  const [bootVisible, setBootVisible] = useState(true)
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    void (async () => {
+      try {
+        const config = await call(window.api.getConfig())
+        if (cancelled) return
+
+        const store = useArchiveStore.getState()
+        store.hydrate(config)
+
+        if (!config.bootSequence || prefersReducedMotion()) setBootVisible(false)
+
+        const rootState = await call(window.api.listTree())
+        if (cancelled) return
+        useArchiveStore.getState().setRoot(rootState)
+        useArchiveStore.getState().checkWhatsNew()
+      } catch (error) {
+        if (cancelled) return
+        setBootVisible(false)
+        useArchiveStore.getState().pushToast('error', errorMessage(error))
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    setResolvedTheme(applyTheme(theme))
+  }, [theme])
+
+  useEffect(() => {
+    document.documentElement.dataset.display = display
+  }, [display])
+
+  const archiveMeta = useArchiveStore((state) => state.archiveMeta)
+  useEffect(() => {
+    document.documentElement.dataset.era = archiveMeta?.techLevel ?? 'spacer'
+  }, [archiveMeta?.techLevel])
+
+  useEffect(
+    () =>
+      onSystemThemeChange(() => {
+        if (useArchiveStore.getState().theme === 'system') {
+          setResolvedTheme(applyTheme('system'))
+        }
+      }),
+    []
+  )
+
+  useEffect(() => {
+    const offTree = window.api.onTreeChanged(() => {
+      const store = useArchiveStore.getState()
+      void store.refreshTree()
+      store.scheduleIndexRefresh()
+    })
+
+    const offRoot = window.api.onRootChanged((rootState) => {
+      useArchiveStore.getState().setRoot(rootState)
+    })
+
+    const offClose = window.api.onCloseRequested(() => {
+      const state = useArchiveStore.getState()
+      const dirty = dirtyPaths(state)
+      if (dirty.length === 0) {
+        void window.api.windowForceClose()
+        return
+      }
+      state.openDialog({
+        kind: 'confirm',
+        title: 'Unsaved records',
+        body: `${dirty.length} record${dirty.length === 1 ? '' : 's'} ${
+          dirty.length === 1 ? 'has' : 'have'
+        } unsaved changes. Discard them and close the terminal?`,
+        confirmLabel: 'Discard and close',
+        danger: true,
+        onConfirm: async () => {
+          await window.api.windowForceClose()
+        }
+      })
+    })
+
+    const offMenu = window.api.onMenuAction((action) => {
+      const state = useArchiveStore.getState()
+      switch (action) {
+        case 'open-folder':
+          void state.openFolder()
+          break
+        case 'unmount-archive':
+          void state.unmountArchive()
+          break
+        case 'new-page':
+          state.newPageFromSelection()
+          break
+        case 'new-folder':
+          state.newFolderFromSelection()
+          break
+        case 'save':
+          void state.saveSelected()
+          break
+        case 'toggle-preview':
+          state.togglePreview()
+          break
+        case 'toggle-sidebar':
+          state.toggleSidebar()
+          break
+        case 'toggle-theme':
+          state.toggleTheme()
+          break
+        case 'toggle-linter':
+          state.toggleLinter()
+          break
+        case 'toggle-autosave':
+          state.toggleAutosave()
+          break
+        case 'toggle-typewriter':
+          state.toggleTypewriter()
+          break
+        case 'toggle-display':
+          state.toggleDisplay()
+          break
+        case 'toggle-keyclick':
+          state.toggleKeyclick()
+          break
+        case 'command-palette':
+          state.setPaletteOpen(true)
+          break
+        case 'focus-mode':
+          state.toggleFocusMode()
+          break
+        case 'dashboard':
+          void state.createDashboard()
+          break
+        case 'timeline':
+          state.togglePanel('timeline')
+          break
+        case 'graph':
+          state.togglePanel('graph')
+          break
+        case 'backlinks':
+          state.togglePanel('backlinks')
+          break
+        case 'diagnostics':
+          state.togglePanel('diagnostics')
+          break
+        case 'history':
+          state.togglePanel('history')
+          break
+        case 'templates':
+          state.togglePanel('templates')
+          break
+        case 'export':
+          state.togglePanel('export')
+          break
+        case 'workspace-archive':
+          state.setWorkspace('archive')
+          break
+        case 'workspace-index':
+          state.setWorkspace('index')
+          break
+        case 'workspace-diagnostics':
+          state.setWorkspace('diagnostics')
+          break
+        case 'workspace-graph':
+          state.setWorkspace('graph')
+          break
+        case 'workspace-timeline':
+          state.setWorkspace('timeline')
+          break
+        case 'operator-manual':
+        case 'workspace-manual':
+          state.setWorkspace('manual')
+          break
+        case 'open-log':
+          void state.openLog()
+          break
+        case 'run-integrity-scan':
+          void state.runIntegrityScan()
+          break
+        case 'set-sector':
+          state.openDialog({
+            kind: 'prompt',
+            title: 'Set sector',
+            label: 'Archive authority sector label.',
+            initial: state.sector,
+            confirmLabel: 'Set sector',
+            onSubmit: async (value) => {
+              state.setSector(value)
+              state.closeDialog()
+            }
+          })
+          break
+        case 'insert-infobox':
+          state.requestInsert(INFOBOX_TEMPLATE)
+          break
+        case 'insert-stub':
+          state.requestInsert(STUB_TEMPLATE)
+          break
+        case 'about':
+          state.openDialog({ kind: 'about' })
+          break
+        case 'close-tab': {
+          const tab = state.selected
+          if (tab) state.closeTab(tab)
+          break
+        }
+        case 'next-tab':
+          state.nextTab()
+          break
+        case 'prev-tab':
+          state.prevTab()
+          break
+        default:
+          break
+      }
+    })
+
+    const offMaximized = window.api.onWindowMaximized((value) => setMaximized(value))
+
+    return () => {
+      offTree()
+      offRoot()
+      offClose()
+      offMenu()
+      offMaximized()
+    }
+  }, [])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent): void => {
+      const mod = event.ctrlKey || event.metaKey
+      const key = event.key.toLowerCase()
+      const state = useArchiveStore.getState()
+
+      if (event.key === 'Escape') {
+        if (state.paletteOpen) {
+          state.setPaletteOpen(false)
+          return
+        }
+        if (state.consoleOpen) {
+          state.toggleConsole()
+          return
+        }
+      }
+
+      if (event.key === 'F1') {
+        event.preventDefault()
+        state.setWorkspace('archive')
+      } else if (event.key === 'F2') {
+        event.preventDefault()
+        state.setWorkspace('index')
+      } else if (event.key === 'F3') {
+        event.preventDefault()
+        state.setWorkspace('diagnostics')
+      } else if (event.key === 'F4') {
+        event.preventDefault()
+        state.setWorkspace('graph')
+      } else if (event.key === 'F5') {
+        event.preventDefault()
+        state.setWorkspace('manual')
+      } else if (event.key === 'F6') {
+        event.preventDefault()
+        state.setWorkspace('timeline')
+      } else if (mod && !event.shiftKey && key === 'k') {
+        event.preventDefault()
+        state.setPaletteOpen(!state.paletteOpen)
+      } else if (mod && !event.shiftKey && key === 's') {
+        event.preventDefault()
+        void state.saveSelected()
+      } else if (mod && !event.shiftKey && key === 'p') {
+        event.preventDefault()
+        state.togglePreview()
+      } else if (mod && !event.shiftKey && key === 'b') {
+        event.preventDefault()
+        state.toggleSidebar()
+      } else if (mod && !event.shiftKey && key === 'n') {
+        event.preventDefault()
+        state.newPageFromSelection()
+      } else if (mod && !event.shiftKey && key === 'o') {
+        event.preventDefault()
+        void state.openFolder()
+      } else if (mod && !event.shiftKey && key === 'w') {
+        event.preventDefault()
+        if (state.selected) state.closeTab(state.selected)
+      } else if (mod && key === 'tab') {
+        event.preventDefault()
+        if (event.shiftKey) state.prevTab()
+        else state.nextTab()
+      } else if (mod && event.shiftKey && key === 'n') {
+        event.preventDefault()
+        state.newFolderFromSelection()
+      } else if (mod && event.shiftKey && key === 't') {
+        event.preventDefault()
+        state.toggleTheme()
+      } else if (mod && event.shiftKey && key === 'l') {
+        event.preventDefault()
+        state.toggleLinter()
+      } else if (mod && event.shiftKey && key === 'f') {
+        event.preventDefault()
+        state.toggleFocusMode()
+      } else if (mod && event.shiftKey && key === 'd') {
+        event.preventDefault()
+        void state.createDashboard()
+      } else if (mod && event.shiftKey && key === 'g') {
+        event.preventDefault()
+        state.togglePanel('graph')
+      } else if (mod && event.shiftKey && key === 'h') {
+        event.preventDefault()
+        state.togglePanel('history')
+      } else if (mod && event.shiftKey && key === 'e') {
+        event.preventDefault()
+        state.togglePanel('export')
+      } else if (mod && !event.shiftKey && event.key === '`') {
+        event.preventDefault()
+        state.toggleConsole()
+      } else if (event.key === 'F2') {
+        event.preventDefault()
+        state.renameSelected()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  const openPanels = PANEL_ORDER.filter((id) => panels[id as keyof typeof panels])
+
+  const workspaceView = (() => {
+    if (workspace === 'index') return <IndexScreen />
+    if (workspace === 'diagnostics') return <DiagnosticsScreen />
+    if (workspace === 'graph') return <GraphScreen />
+    if (workspace === 'timeline') return <TimelineScreen />
+    if (workspace === 'manual') return <OperatorManual />
+    if (!rootPath) return <IdleScreen />
+    return (
+      <>
+        <Sidebar />
+        <div className="content" ref={contentRef}>
+          <EditorPane />
+          {previewVisible ? <Splitter containerRef={contentRef} /> : null}
+          {previewVisible ? <PreviewPane /> : null}
+        </div>
+      </>
+    )
+  })()
+
+  return (
+    <div className={`app ${focusMode ? 'app--focus' : ''}`}>
+      <TitleBar resolvedTheme={resolvedTheme} maximized={maximized} />
+      <ColonyBanner />
+
+      <div className="workspace">
+        {workspace === 'archive' ? (
+          workspaceView
+        ) : (
+          <div className="content content--screen">{workspaceView}</div>
+        )}
+      </div>
+
+      <ConsoleBar />
+      <StatusBar resolvedTheme={resolvedTheme} />
+
+      {workspace === 'archive' ? (
+        openPanels.map((id) => (
+          <SubWindow
+            key={id}
+            title={PANEL_META[id].program}
+            subtitle={PANEL_META[id].title}
+            width={Math.min(PANEL_META[id].width, Math.max(280, window.innerWidth - 40))}
+            initial={panelOrigin(id)}
+            onClose={() => useArchiveStore.getState().closePanel(id as keyof typeof panels)}
+          >
+            {panelBody(id)}
+          </SubWindow>
+        ))
+      ) : null}
+
+      <CommandPalette />
+      <ContextMenu />
+      <DialogHost />
+      <ToastStack />
+      {newPagePickerDir !== null ? (
+        <TemplatePickerDialog dirPath={newPagePickerDir} onClose={closeNewPagePicker} />
+      ) : null}
+      <MountSequence />
+
+      {bootVisible ? <BootSequence onDone={() => setBootVisible(false)} /> : null}
+    </div>
+  )
+}

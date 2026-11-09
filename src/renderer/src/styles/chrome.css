@@ -1,0 +1,305 @@
+.app {
+  display: grid;
+  grid-template-rows: var(--titlebar-h) minmax(0, 1fr) var(--statusbar-h);
+  height: 100%;
+  background: var(--bg-0);
+}
+
+/* ── Title bar ─────────────────────────────────────────────────────────── */
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-1);
+  user-select: none;
+  -webkit-app-region: drag;
+}
+
+.titlebar__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.titlebar__mark {
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0;
+  text-shadow: 0 0 3px var(--accent-glow);
+}
+
+.titlebar__name {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.titlebar__sep {
+  color: var(--text-faint);
+  letter-spacing: 0;
+}
+
+.titlebar__folder {
+  overflow: hidden;
+  max-width: 32vw;
+  color: var(--text-dim);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.titlebar__folder--empty {
+  color: var(--text-faint);
+}
+
+.titlebar__spacer {
+  flex: 1;
+}
+
+.titlebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar__toggle {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 24px;
+  color: var(--text-dim);
+  font-size: 13px;
+  transition:
+    color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+.titlebar__toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.window-controls {
+  display: flex;
+  height: 100%;
+  margin-left: 6px;
+}
+
+.window-control {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 100%;
+  color: var(--text-dim);
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+  -webkit-app-region: no-drag;
+}
+
+.window-control:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.window-control--close:hover {
+  background: var(--danger);
+  color: var(--bg-0);
+}
+
+.window-control svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* ── Dropdown menu ─────────────────────────────────────────────────────── */
+
+.dropdown {
+  position: relative;
+  -webkit-app-region: no-drag;
+}
+
+.dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    background var(--dur) var(--ease);
+}
+
+.dropdown__trigger:hover,
+.dropdown__trigger--open {
+  border-color: var(--line-strong);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dropdown__caret {
+  color: var(--text-faint);
+  font-size: 8px;
+}
+
+.dropdown__panel {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 220;
+  min-width: 214px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  animation: fade-in 90ms var(--ease);
+}
+
+.dropdown__panel--right {
+  right: 0;
+  left: auto;
+}
+
+.dropdown__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  width: 100%;
+  padding: 7px 9px;
+  color: var(--text-dim);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-transform: uppercase;
+  transition:
+    background var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.dropdown__item:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dropdown__item--danger:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.dropdown__hint {
+  color: var(--text-faint);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+}
+
+.dropdown__item:hover .dropdown__hint {
+  color: var(--accent-dim);
+}
+
+.dropdown__sep {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--line);
+}
+
+.dropdown__section {
+  padding: 7px 9px 4px;
+  color: var(--text-faint);
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* ── Status bar ────────────────────────────────────────────────────────── */
+
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 12px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-1);
+  color: var(--text-faint);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.statusbar__group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.statusbar__spacer {
+  flex: 1;
+}
+
+.statusbar__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status--saved {
+  color: var(--accent);
+}
+
+.status--dirty {
+  color: var(--warn);
+}
+
+.status--dirty .statusbar__dot {
+  border: 1px solid var(--warn);
+  background: transparent;
+}
+
+.statusbar__path {
+  overflow: hidden;
+  max-width: 30vw;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: none;
+}
+
+.statusbar__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--warn);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.statusbar__button:hover {
+  color: var(--accent);
+}
+
+.statusbar__theme {
+  color: var(--text-dim);
+}
+
+.statusbar__theme:hover {
+  color: var(--accent);
+}
