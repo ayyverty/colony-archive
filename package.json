@@ -1,6 +1,6 @@
 {
   "name": "rimcodex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A minimal sci-fi Markdown archive for RimWorld colony records.",
   "main": "./out/main/index.js",
   "author": "Avery",
