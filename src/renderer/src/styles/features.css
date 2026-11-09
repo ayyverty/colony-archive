@@ -1805,6 +1805,12 @@
 
 /* ── Title bar clock ───────────────────────────────────────────────────── */
 
+.titlebar__clock,
+.titlebar__clock * {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
 .titlebar__clock {
   display: inline-flex;
   align-items: center;
@@ -1817,8 +1823,6 @@
   font-size: 9px;
   letter-spacing: 0.08em;
   white-space: nowrap;
-  -webkit-app-region: no-drag;
-  pointer-events: auto;
 }
 
 .titlebar__clock-date {
@@ -2444,7 +2448,7 @@
 .mount-sequence {
   position: fixed;
   inset: 0;
-  z-index: 280;
+  z-index: 250;
   display: grid;
   place-items: center;
   background: rgba(7, 10, 13, 0.72);

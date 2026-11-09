@@ -8,6 +8,8 @@
 /* ── Title bar ─────────────────────────────────────────────────────────── */
 
 .titlebar {
+  position: relative;
+  z-index: 300;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -64,6 +66,12 @@
   flex: 1;
 }
 
+.titlebar__actions,
+.titlebar__actions * {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
 .titlebar__actions {
   display: flex;
   align-items: center;
@@ -71,8 +79,6 @@
   height: 100%;
   position: relative;
   z-index: 2;
-  -webkit-app-region: no-drag;
-  pointer-events: auto;
 }
 
 .titlebar__toggle {
@@ -94,14 +100,23 @@
   color: var(--accent);
 }
 
+.titlebar__toggle svg {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
+.window-controls,
+.window-controls * {
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
+}
+
 .window-controls {
   display: flex;
   height: 100%;
   margin-left: 6px;
   position: relative;
   z-index: 3;
-  -webkit-app-region: no-drag;
-  pointer-events: auto;
 }
 
 .window-control {
@@ -129,6 +144,8 @@
 .window-control svg {
   width: 10px;
   height: 10px;
+  -webkit-app-region: no-drag;
+  pointer-events: auto;
 }
 
 /* ── Dropdown menu ─────────────────────────────────────────────────────── */
