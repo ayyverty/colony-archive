@@ -88,6 +88,7 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
   const openLog = useArchiveStore((state) => state.openLog)
   const setWorkspace = useArchiveStore((state) => state.setWorkspace)
   const togglePanel = useArchiveStore((state) => state.togglePanel)
+  const openPanel = useArchiveStore((state) => state.openPanel)
   const createDashboard = useArchiveStore((state) => state.createDashboard)
   const savePageAsTemplate = useArchiveStore((state) => state.savePageAsTemplate)
   const setPaletteOpen = useArchiveStore((state) => state.setPaletteOpen)
@@ -161,6 +162,7 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
     { id: 'keyclick', label: `Key click: ${keyclick ? 'ON' : 'MUTED'}`, onSelect: toggleKeyclick },
     { id: 'signoff', label: `Sign-off: ${useArchiveStore.getState().signOff ? 'ON' : 'OFF'}`, onSelect: toggleSignOff },
     { id: 'sector', label: `Sector: ${sector}`, onSelect: () => openDialog({ kind: 'prompt', title: 'Set sector', label: 'Archive authority sector label.', initial: sector, confirmLabel: 'Set sector', onSubmit: async (value) => { setSector(value); closeDialog() } }) },
+    { id: 'profile', label: `Profile: ${useArchiveStore.getState().profile.preset}`, onSelect: () => openPanel('profile') },
     { id: 'era', label: `Era: ${(archiveMeta?.techLevel ?? 'spacer').toUpperCase()}`, onSelect: () => openDialog({ kind: 'prompt', title: 'Set era', label: 'neolithic, industrial, spacer, or ultratech.', initial: archiveMeta?.techLevel ?? 'spacer', confirmLabel: 'Set era', onSubmit: async (value) => { await setTechLevel(value as 'neolithic' | 'industrial' | 'spacer' | 'ultratech'); closeDialog() } }) },
     { id: 'seal', label: 'Set seal passphrase', onSelect: () => openDialog({ kind: 'prompt', title: 'Seal passphrase', label: 'Fake passphrase for sealed archives.', initial: useArchiveStore.getState().sealPassphrase, confirmLabel: 'Set passphrase', onSubmit: async (value) => { setSealPassphrase(value); closeDialog() } }) },
     { id: 'inbox', label: 'Open inbox', onSelect: () => void openInbox() },

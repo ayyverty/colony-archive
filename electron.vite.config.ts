@@ -53,7 +53,16 @@ export default defineConfig({
     plugins: [react(), productionCsp],
     build: {
       rollupOptions: {
-        input: { index: resolve('src/renderer/index.html') }
+        input: { index: resolve('src/renderer/index.html') },
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'react'
+            if (id.includes('node_modules/@codemirror')) return 'codemirror'
+            if (id.includes('node_modules/marked') || id.includes('node_modules/dompurify')) return 'markdown'
+            if (id.includes('node_modules/zustand')) return 'state'
+            return undefined
+          }
+        }
       }
     }
   }

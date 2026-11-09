@@ -5,6 +5,7 @@ import { useArchiveStore } from '../state/store'
 export function DashboardView() {
   const index = useArchiveStore((state) => state.index)
   const selectPath = useArchiveStore((state) => state.selectPath)
+  const profile = useArchiveStore((state) => state.profile)
 
   const data = useMemo(() => {
     if (!index) return null
@@ -48,22 +49,22 @@ export function DashboardView() {
 
       <div className="dashboard__grid">
         <div className="dash-card">
-          <div className="dash-card__label">populace</div>
+          <div className="dash-card__label">{profile.character.toLowerCase()}s</div>
           <div className="dash-card__value">{colonist}</div>
-          <div className="dash-card__hint">colonist records</div>
+          <div className="dash-card__hint">{profile.character.toLowerCase()} records</div>
         </div>
         <div className="dash-card">
-          <div className="dash-card__label">factions</div>
+          <div className="dash-card__label">{profile.group.toLowerCase()}s</div>
           <div className="dash-card__value">{faction}</div>
           <div className="dash-card__hint">known powers</div>
         </div>
         <div className="dash-card">
-          <div className="dash-card__label">events</div>
+          <div className="dash-card__label">{profile.event.toLowerCase()}s</div>
           <div className="dash-card__value">{event}</div>
           <div className="dash-card__hint">dated chronicles</div>
         </div>
         <div className="dash-card">
-          <div className="dash-card__label">items</div>
+          <div className="dash-card__label">{profile.item.toLowerCase()}s</div>
           <div className="dash-card__value">{item}</div>
           <div className="dash-card__hint">catalogued things</div>
         </div>

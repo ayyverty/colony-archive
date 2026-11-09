@@ -197,6 +197,20 @@ export interface ArchiveIndex {
   meta: ArchiveMeta | null
 }
 
+export interface ArchiveProfile {
+  preset: string
+  archive: string
+  character: string
+  group: string
+  item: string
+  location: string
+  event: string
+  journey: string
+  keeper: string
+  inbox: string
+  log: string
+}
+
 export interface ArchiveMeta {
   path: string
   title: string
@@ -214,6 +228,17 @@ export interface ArchiveMeta {
   hostileFactions: string[]
   alliedFactions: string[]
   archiveId: string | null
+  profile: ArchiveProfile
+  term_archive: string | null
+  term_character: string | null
+  term_group: string | null
+  term_item: string | null
+  term_location: string | null
+  term_event: string | null
+  term_journey: string | null
+  term_keeper: string | null
+  term_inbox: string | null
+  term_log: string | null
 }
 
 export interface IntegrityIssue {

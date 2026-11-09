@@ -11,6 +11,39 @@ tags: [manual, help]
 
 This manual is a normal archive record. Edit it, link to it, and restore it from history.
 
+## Archive profiles and presets
+
+RimCodex can describe any kind of archive. Choose a profile in
+**SYSTEM → ARCHIVE PROFILE…** to change the words used throughout the app.
+
+| Preset | Best for | Example terms |
+| --- | --- | --- |
+| Generic Archive | Notes, research, mixed projects | Archive, Character, Group, Event |
+| Worldbuilding | Settings and fictional worlds | World, Character, Faction, Location |
+| D&D Campaign | Tabletop campaigns | Campaign, Character, Faction, Session, GM |
+| Novel / Story | Fiction and story planning | Story, Character, Group, Scene, Artifact |
+| RimWorld Colony | RimWorld playthroughs | Colony, Colonist, Faction, Event, Archivist |
+
+A preset changes labels such as the archive name, characters, groups, items,
+locations, events, journeys, inbox, log, and keeper title. It does not rename or
+change your pages.
+
+Choose **Custom** to edit every label yourself. The preview updates before you save.
+
+Existing archives keep their current labels until you choose a new preset.
+
+### Calendar and date format
+
+Open **SYSTEM → CALENDAR & DATE FORMAT…** to choose a calendar preset and format.
+
+- RimWorld: \`{year} · {monthName} {day}\`
+- ISO: \`{year}-{month:02}-{day:02}\`
+- Long: \`{dayOrdinal} of {monthName}, {year}\`
+- D&D: \`{dayOrdinal} of {monthName}, {year} {era}\`
+
+Dates are stored as \`YYYY-MM-DD\`. Month names and month lengths can be customized
+for calendars such as D&D.
+
 ## Mounting
 
 Mount a folder with \`MOUNT ARCHIVE…\` or \`Ctrl O\`. The archive is confined to that folder.

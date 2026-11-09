@@ -19,8 +19,8 @@ interface Edge {
 
 const WIDTH = 820
 const HEIGHT = 560
-const ITERATIONS = 120
-const MAX_NODES = 150
+const ITERATIONS = 60
+const MAX_NODES = 100
 
 function layout(index: ArchiveIndex): { nodes: Node[]; edges: Edge[] } {
   const degree = new Map<string, number>()

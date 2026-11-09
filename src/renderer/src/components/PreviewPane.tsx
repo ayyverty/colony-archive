@@ -44,6 +44,7 @@ export function PreviewPane() {
   const debounced = useDebouncedValue(source, 200)
   const lookup = useMemo(() => createPageLookup(index), [index])
   const page = selected ? lookup.get(selected) : undefined
+  const parsedFrontmatter = useMemo(() => parseFrontmatter(debounced), [debounced])
   const html = useMemo(
     () =>
       renderMarkdown(debounced, {
@@ -216,11 +217,11 @@ export function PreviewPane() {
             <StampBadge />
             <article
               className={`markdown ${
-                String(parseFrontmatter(debounced).data.scanned ?? '').toLowerCase() === 'true' || parseFrontmatter(debounced).data.style === 'scanned'
+                String(parsedFrontmatter.data.scanned ?? '').toLowerCase() === 'true' || parsedFrontmatter.data.style === 'scanned'
                   ? 'markdown--scanned'
                   : ''
               } ${
-                parseFrontmatter(debounced).data.type === 'handwritten' || parseFrontmatter(debounced).data.style === 'handwritten'
+                parsedFrontmatter.data.type === 'handwritten' || parsedFrontmatter.data.style === 'handwritten'
                   ? 'markdown--handwritten'
                   : ''
               }`}

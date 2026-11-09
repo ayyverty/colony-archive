@@ -8,9 +8,19 @@ const MAX_INDEX_BYTES = 48 * 1024 * 1024
 const CONCURRENCY = 12
 
 let cache: { root: string; index: ArchiveIndex } | null = null
+let treeCache: { root: string; tree: TreeNode } | null = null
 
 export function invalidateIndex(): void {
   cache = null
+  treeCache = null
+}
+
+export function cacheTree(root: string, tree: TreeNode): void {
+  treeCache = { root, tree }
+}
+
+export function getCachedTree(root: string): TreeNode | null {
+  return treeCache?.root === root ? treeCache.tree : null
 }
 
 export function collectFiles(node: TreeNode, out: string[]): void {
@@ -23,7 +33,8 @@ export function collectFiles(node: TreeNode, out: string[]): void {
 export async function indexArchive(root: string): Promise<ArchiveIndex> {
   if (cache?.root === root) return cache.index
 
-  const tree = await buildTree(root)
+  const tree = getCachedTree(root) ?? (await buildTree(root))
+  if (!getCachedTree(root)) cacheTree(root, tree)
   const paths: string[] = []
   collectFiles(tree, paths)
 

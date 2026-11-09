@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useArchiveStore, isDirty } from '../state/store'
 import { call, errorMessage } from '../lib/api'
-import { Editor } from './Editor'
+import { lazy, Suspense } from 'react'
+const Editor = lazy(() => import('./Editor').then((m) => ({ default: m.Editor })))
 import { Dropdown } from './Dropdown'
 import type { DropdownEntry } from './Dropdown'
 import { FrontmatterEditor } from './FrontmatterEditor'
@@ -247,23 +248,25 @@ export function EditorPane() {
             <StarterBanner path={selected} />
             <FrontmatterSuggest path={selected} />
             <TableHelper />
-            <Editor
-              key={selected}
-              path={selected}
-              value={content}
-              linterEnabled={linter}
-              typewriter={typewriterScroll}
-              focusMode={focusMode}
-              keyclick={keyclick}
-              readOnly={selected === '_log.md'}
-              onChange={(next) => updateDraft(selected, next)}
-              onCursor={setCursor}
-              onTableInfo={setTableInfo}
-              onRunCommand={(slashPos, coords) => setRunPalette({ slashPos, left: coords.left, top: coords.top + 18 })}
-              executeRef={executeRef}
-              insertRequest={insertRequest}
-              action={editorAction}
-            />
+            <Suspense fallback={<div className="editor-host" />}>
+              <Editor
+                key={selected}
+                path={selected}
+                value={content}
+                linterEnabled={linter}
+                typewriter={typewriterScroll}
+                focusMode={focusMode}
+                keyclick={keyclick}
+                readOnly={selected === '_log.md'}
+                onChange={(next) => updateDraft(selected, next)}
+                onCursor={setCursor}
+                onTableInfo={setTableInfo}
+                onRunCommand={(slashPos, coords) => setRunPalette({ slashPos, left: coords.left, top: coords.top + 18 })}
+                executeRef={executeRef}
+                insertRequest={insertRequest}
+                action={editorAction}
+              />
+            </Suspense>
           </div>
           {seeAlsoOpen ? <SeeAlsoPanel /> : null}
           <RunPalette

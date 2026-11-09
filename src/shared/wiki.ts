@@ -1,4 +1,5 @@
 import { listValue, parseFrontmatter, stringValue } from './frontmatter'
+import { profileFromMeta } from './profiles'
 import type {
   ArchiveIndex,
   ArchiveMeta,
@@ -411,7 +412,30 @@ export function parseArchiveMeta(_rootPath: string, raw: RawPage | null): Archiv
     faction: stringValue(parsed.data.faction).trim() || null,
     hostileFactions: hostile,
     alliedFactions: allied,
-    archiveId: stringValue(parsed.data.archive_id ?? parsed.data.archiveId).trim() || null
+    archiveId: stringValue(parsed.data.archive_id ?? parsed.data.archiveId).trim() || null,
+    term_archive: stringValue(parsed.data.term_archive ?? parsed.data.archive).trim() || null,
+    term_character: stringValue(parsed.data.term_character ?? parsed.data.character).trim() || null,
+    term_group: stringValue(parsed.data.term_group ?? parsed.data.group).trim() || null,
+    term_item: stringValue(parsed.data.term_item ?? parsed.data.item).trim() || null,
+    term_location: stringValue(parsed.data.term_location ?? parsed.data.location).trim() || null,
+    term_event: stringValue(parsed.data.term_event ?? parsed.data.event).trim() || null,
+    term_journey: stringValue(parsed.data.term_journey ?? parsed.data.journey).trim() || null,
+    term_keeper: stringValue(parsed.data.term_keeper ?? parsed.data.keeper).trim() || null,
+    term_inbox: stringValue(parsed.data.term_inbox ?? parsed.data.inbox).trim() || null,
+    term_log: stringValue(parsed.data.term_log ?? parsed.data.log).trim() || null,
+    profile: profileFromMeta({
+      profile: stringValue(parsed.data.profile ?? parsed.data.preset).trim() || null,
+      term_archive: stringValue(parsed.data.term_archive ?? parsed.data.archive).trim() || null,
+      term_character: stringValue(parsed.data.term_character ?? parsed.data.character).trim() || null,
+      term_group: stringValue(parsed.data.term_group ?? parsed.data.group).trim() || null,
+      term_item: stringValue(parsed.data.term_item ?? parsed.data.item).trim() || null,
+      term_location: stringValue(parsed.data.term_location ?? parsed.data.location).trim() || null,
+      term_event: stringValue(parsed.data.term_event ?? parsed.data.event).trim() || null,
+      term_journey: stringValue(parsed.data.term_journey ?? parsed.data.journey).trim() || null,
+      term_keeper: stringValue(parsed.data.term_keeper ?? parsed.data.keeper).trim() || null,
+      term_inbox: stringValue(parsed.data.term_inbox ?? parsed.data.inbox).trim() || null,
+      term_log: stringValue(parsed.data.term_log ?? parsed.data.log).trim() || null
+    })
   }
 }
 

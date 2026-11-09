@@ -4,6 +4,7 @@ import { createPageLookup } from '@shared/wiki'
 
 export function ArchiveContextStrip() {
   const archiveMeta = useArchiveStore((state) => state.archiveMeta)
+  const profile = useArchiveStore((state) => state.profile)
   const index = useArchiveStore((state) => state.index)
   const selectPath = useArchiveStore((state) => state.selectPath)
   const lookup = useMemo(() => createPageLookup(index), [index])
@@ -46,7 +47,7 @@ export function ArchiveContextStrip() {
       ) : null}
       {archiveMeta.archivist ? (
         <>
-          <span className="archive-context__label">ARCHIVIST</span>
+          <span className="archive-context__label">{profile.keeper.toUpperCase()}</span>
           <span className={`archive-context__value ${archivistDead ? 'archive-context__value--dead' : ''}`}>
             {archivistDead ? '[DECEASED]' : archiveMeta.archivist}
           </span>

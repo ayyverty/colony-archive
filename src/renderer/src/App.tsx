@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import type { ResolvedTheme } from '@shared/types'
 import { useArchiveStore, dirtyPaths } from './state/store'
 import { call, errorMessage } from './lib/api'
@@ -17,23 +17,24 @@ import { BootSequence } from './components/BootSequence'
 import { CommandPalette } from './components/CommandPalette'
 import { ConsoleBar } from './components/ConsoleBar'
 import { SubWindow } from './components/SubWindow'
-import { BacklinksPanel } from './components/panels/BacklinksPanel'
-import { DiagnosticsPanel } from './components/panels/DiagnosticsPanel'
-import { TimelinePanel } from './components/panels/TimelinePanel'
-import { GraphPanel } from './components/panels/GraphPanel'
-import { HistoryPanel } from './components/panels/HistoryPanel'
-import { TemplatesPanel } from './components/panels/TemplatesPanel'
-import { ExportPanel } from './components/panels/ExportPanel'
-import { IndexScreen } from './components/IndexScreen'
-import { DiagnosticsScreen } from './components/DiagnosticsScreen'
-import { GraphScreen } from './components/GraphScreen'
-import { OperatorManual } from './components/OperatorManual'
-import { IdleScreen } from './components/IdleScreen'
-import { TemplatePickerDialog } from './components/TemplatePickerDialog'
-import { MountSequence } from './components/MountSequence'
-import { ColonyBanner } from './components/ColonyBanner'
-import { TimelineScreen } from './components/TimelineScreen'
-import { InboxPanel } from './components/panels/InboxPanel'
+const BacklinksPanel = lazy(() => import('./components/panels/BacklinksPanel').then((m) => ({ default: m.BacklinksPanel })))
+const DiagnosticsPanel = lazy(() => import('./components/panels/DiagnosticsPanel').then((m) => ({ default: m.DiagnosticsPanel })))
+const TimelinePanel = lazy(() => import('./components/panels/TimelinePanel').then((m) => ({ default: m.TimelinePanel })))
+const GraphPanel = lazy(() => import('./components/panels/GraphPanel').then((m) => ({ default: m.GraphPanel })))
+const HistoryPanel = lazy(() => import('./components/panels/HistoryPanel').then((m) => ({ default: m.HistoryPanel })))
+const TemplatesPanel = lazy(() => import('./components/panels/TemplatesPanel').then((m) => ({ default: m.TemplatesPanel })))
+const ExportPanel = lazy(() => import('./components/panels/ExportPanel').then((m) => ({ default: m.ExportPanel })))
+const IndexScreen = lazy(() => import('./components/IndexScreen').then((m) => ({ default: m.IndexScreen })))
+const DiagnosticsScreen = lazy(() => import('./components/DiagnosticsScreen').then((m) => ({ default: m.DiagnosticsScreen })))
+const GraphScreen = lazy(() => import('./components/GraphScreen').then((m) => ({ default: m.GraphScreen })))
+const OperatorManual = lazy(() => import('./components/OperatorManual').then((m) => ({ default: m.OperatorManual })))
+const IdleScreen = lazy(() => import('./components/IdleScreen').then((m) => ({ default: m.IdleScreen })))
+const TimelineScreen = lazy(() => import('./components/TimelineScreen').then((m) => ({ default: m.TimelineScreen })))
+const InboxPanel = lazy(() => import('./components/panels/InboxPanel').then((m) => ({ default: m.InboxPanel })))
+const ProfilePanel = lazy(() => import('./components/panels/ProfilePanel').then((m) => ({ default: m.ProfilePanel })))
+const MountSequence = lazy(() => import('./components/MountSequence').then((m) => ({ default: m.MountSequence })))
+const ColonyBanner = lazy(() => import('./components/ColonyBanner').then((m) => ({ default: m.ColonyBanner })))
+const TemplatePickerDialog = lazy(() => import('./components/TemplatePickerDialog').then((m) => ({ default: m.TemplatePickerDialog })))
 import { SUBSYSTEMS } from './lib/subsystems'
 
 interface PanelMeta {
@@ -51,7 +52,8 @@ const PANEL_META: Record<string, PanelMeta> = {
   history: { title: 'Version history', subtitle: '.history', program: SUBSYSTEMS.history, width: 400 },
   templates: { title: 'Templates', subtitle: '_templates', program: SUBSYSTEMS.templates, width: 390 },
   export: { title: 'Export', subtitle: 'html / pdf', program: SUBSYSTEMS.export, width: 380 },
-  inbox: { title: 'Inbox', subtitle: 'dispatches', program: 'INBOX.SVC', width: 420 }
+  inbox: { title: 'Inbox', subtitle: 'dispatches', program: 'INBOX.SVC', width: 420 },
+  profile: { title: 'Profile', subtitle: 'terms', program: 'PROFILE.SVC', width: 420 }
 }
 
 const PANEL_ORDER = Object.keys(PANEL_META)
@@ -74,6 +76,8 @@ function panelBody(id: string) {
       return <ExportPanel />
     case 'inbox':
       return <InboxPanel />
+    case 'profile':
+      return <ProfilePanel />
     default:
       return null
   }
@@ -102,6 +106,8 @@ export default function App() {
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme('system'))
   const [maximized, setMaximized] = useState(false)
   const [bootVisible, setBootVisible] = useState(true)
+  const [bootAnimationDone, setBootAnimationDone] = useState(false)
+  const [startupReady, setStartupReady] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -115,11 +121,16 @@ export default function App() {
         const store = useArchiveStore.getState()
         store.hydrate(config)
 
-        if (!config.bootSequence || prefersReducedMotion()) setBootVisible(false)
+        if (!config.bootSequence || prefersReducedMotion()) {
+          setBootVisible(false)
+          setBootAnimationDone(true)
+          setStartupReady(true)
+        }
 
         const rootState = await call(window.api.listTree())
         if (cancelled) return
         useArchiveStore.getState().setRoot(rootState)
+        setStartupReady(true)
         useArchiveStore.getState().checkWhatsNew()
       } catch (error) {
         if (cancelled) return
@@ -140,6 +151,14 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.display = display
   }, [display])
+
+  useEffect(() => {
+    void import('./components/Editor')
+  }, [])
+
+  useEffect(() => {
+    if (bootAnimationDone && startupReady) setBootVisible(false)
+  }, [bootAnimationDone, startupReady])
 
   const archiveMeta = useArchiveStore((state) => state.archiveMeta)
   useEffect(() => {
@@ -165,6 +184,7 @@ export default function App() {
 
     const offRoot = window.api.onRootChanged((rootState) => {
       useArchiveStore.getState().setRoot(rootState)
+      setStartupReady(true)
     })
 
     const offClose = window.api.onCloseRequested(() => {
@@ -434,12 +454,12 @@ export default function App() {
   const openPanels = PANEL_ORDER.filter((id) => panels[id as keyof typeof panels])
 
   const workspaceView = (() => {
-    if (workspace === 'index') return <IndexScreen />
-    if (workspace === 'diagnostics') return <DiagnosticsScreen />
-    if (workspace === 'graph') return <GraphScreen />
-    if (workspace === 'timeline') return <TimelineScreen />
-    if (workspace === 'manual') return <OperatorManual />
-    if (!rootPath) return <IdleScreen />
+    if (workspace === 'index') return <Suspense fallback={null}><IndexScreen /></Suspense>
+    if (workspace === 'diagnostics') return <Suspense fallback={null}><DiagnosticsScreen /></Suspense>
+    if (workspace === 'graph') return <Suspense fallback={null}><GraphScreen /></Suspense>
+    if (workspace === 'timeline') return <Suspense fallback={null}><TimelineScreen /></Suspense>
+    if (workspace === 'manual') return <Suspense fallback={null}><OperatorManual /></Suspense>
+    if (!rootPath) return <Suspense fallback={null}><IdleScreen /></Suspense>
     return (
       <>
         <Sidebar />
@@ -455,7 +475,7 @@ export default function App() {
   return (
     <div className={`app ${focusMode ? 'app--focus' : ''}`}>
       <TitleBar resolvedTheme={resolvedTheme} maximized={maximized} />
-      <ColonyBanner />
+      <Suspense fallback={null}><ColonyBanner /></Suspense>
 
       <div className="workspace">
         {workspace === 'archive' ? (
@@ -488,11 +508,13 @@ export default function App() {
       <DialogHost />
       <ToastStack />
       {newPagePickerDir !== null ? (
-        <TemplatePickerDialog dirPath={newPagePickerDir} onClose={closeNewPagePicker} />
+        <Suspense fallback={null}>
+          <TemplatePickerDialog dirPath={newPagePickerDir} onClose={closeNewPagePicker} />
+        </Suspense>
       ) : null}
-      <MountSequence />
+      <Suspense fallback={null}><MountSequence /></Suspense>
 
-      {bootVisible ? <BootSequence onDone={() => setBootVisible(false)} /> : null}
+      {bootVisible ? <BootSequence onDone={() => setBootAnimationDone(true)} /> : null}
     </div>
   )
 }

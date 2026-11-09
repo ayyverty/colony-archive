@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url'
 import { attachmentPath } from './attachmentService'
 import { loadConfig } from './config'
 import {
+  broadcastCurrentRoot,
   getRootPath,
   isCloseAllowed,
   promptForFolder,
@@ -112,8 +113,10 @@ if (!hasLock) {
     })
     session.defaultSession.setPermissionCheckHandler(() => false)
 
-    await restoreArchive()
     createWindow()
+    void restoreArchive()
+      .then(() => broadcastCurrentRoot())
+      .catch(() => undefined)
 
     const config = await loadConfig()
     if (!config.rootPath) {

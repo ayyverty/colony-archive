@@ -19,6 +19,8 @@ import { parseFrontmatter, stringValue, updateFrontmatter } from '@shared/frontm
 import { addRimDays, parseRimDate } from '@shared/wiki'
 import { PAGE_TEMPLATES, starterFrontmatterForType } from '@shared/pageTemplates'
 import { APP_RELEASE } from '@shared/release'
+import { DEFAULT_PROFILE, profileFromMeta, profileToFields, PROFILE_PRESETS } from '@shared/profiles'
+import type { ArchiveProfile } from '@shared/types'
 
 export type ToastKind = 'info' | 'error' | 'success'
 
@@ -68,6 +70,7 @@ export type PanelId =
   | 'templates'
   | 'export'
   | 'inbox'
+  | 'profile'
 
 export type ConsoleKind = 'info' | 'save' | 'error' | 'system'
 
@@ -142,6 +145,7 @@ export interface ArchiveStore {
   seeAlsoOpen: boolean
   newPagePickerDir: string | null
   archiveMeta: ArchiveMeta | null
+  profile: ArchiveProfile
   revisions: Record<string, number>
   lastRevision: { path: string; from: number; to: number } | null
   scanRunning: boolean
@@ -210,6 +214,8 @@ export interface ArchiveStore {
   unsealPath: (path: string, passphrase: string) => boolean
   toggleSignOff: () => void
   setSealPassphrase: (value: string) => void
+  setProfile: (preset: string) => Promise<void>
+  setProfileTerms: (terms: Partial<ArchiveProfile>) => Promise<void>
   openManual: (anchor?: string) => Promise<void>
   announceOnce: (key: string, message: string) => void
   checkWhatsNew: () => void
@@ -356,7 +362,8 @@ function defaultPanels(): Record<PanelId, boolean> {
     history: false,
     templates: false,
     export: false,
-  inbox: false
+  inbox: false,
+  profile: false
   }
 }
 
@@ -417,6 +424,7 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
   seeAlsoOpen: true,
   newPagePickerDir: null,
   archiveMeta: null,
+  profile: DEFAULT_PROFILE,
   revisions: {},
   lastRevision: null,
   scanRunning: false,
@@ -496,7 +504,8 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
       mountLines: newRoot
         ? [`> mounting ${state.rootPath}`, '> verifying archive root', '> scanning records', '> linking references', '> archive online']
         : [],
-      archiveMeta: null
+      archiveMeta: null,
+      profile: DEFAULT_PROFILE
     })
 
     if (!state.rootPath) {
@@ -505,9 +514,9 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
     }
 
     get().log(`mounted ${state.rootPath}`, 'system')
-    void get().refreshIndex()
     void get().loadTemplates()
     if (newRoot) window.setTimeout(() => set({ mounting: false }), 520)
+    window.setTimeout(() => void get().refreshIndex(), 250)
   },
 
   refreshTree: async () => {
@@ -552,7 +561,7 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
     try {
       const index = await call(window.api.indexArchive())
       if (token !== indexSeq) return
-      set({ index, archiveMeta: index?.meta ?? null, indexLoading: false, lastIndexAt: Date.now() })
+      set({ index, archiveMeta: index?.meta ?? null, profile: profileFromMeta(index?.meta as unknown as Record<string, unknown> ?? null), indexLoading: false, lastIndexAt: Date.now() })
     } catch (error) {
       if (token !== indexSeq) return
       set({ indexLoading: false })
@@ -1154,6 +1163,24 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
     await get().refreshTree()
     await get().selectPath(`Memorials/${safeName}`)
     get().log(`memorial generated for ${page.title}`, 'system')
+  },
+
+  setProfile: async (preset) => {
+    const profile = PROFILE_PRESETS[preset] ?? { ...DEFAULT_PROFILE, preset }
+    const file = await call(window.api.readFile('_archive.md')).catch(() => null)
+    const source = file?.content ?? '---\n---\n'
+    await call(window.api.writeFile('_archive.md', updateFrontmatter(source, profileToFields(profile))))
+    await get().refreshIndex()
+    get().log(`archive profile set to ${profile.archive}`, 'system')
+  },
+
+  setProfileTerms: async (terms) => {
+    const profile = { ...get().profile, ...terms }
+    const file = await call(window.api.readFile('_archive.md')).catch(() => null)
+    const source = file?.content ?? '---\n---\n'
+    await call(window.api.writeFile('_archive.md', updateFrontmatter(source, profileToFields(profile))))
+    await get().refreshIndex()
+    get().log('archive profile updated', 'system')
   },
 
   toggleExpanded: (path) =>

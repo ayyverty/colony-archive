@@ -7,7 +7,7 @@ import * as fsService from './fsService'
 import * as attachmentService from './attachmentService'
 import { exportHtml, exportPdf } from './exportService'
 import { ensureOnboarding } from './onboarding'
-import { indexArchive, invalidateIndex } from './indexer'
+import { cacheTree, indexArchive, invalidateIndex } from './indexer'
 import { PathValidationError, toAbsoluteReal } from './paths'
 import {
   IPC,
@@ -70,9 +70,11 @@ function mountArchives(archives: string[], mounted: string): string[] {
 async function rootState(): Promise<RootState> {
   const config = await loadConfig()
   if (!root) return { rootPath: null, tree: null, archives: config.archives }
+  const tree = await fsService.buildTree(root)
+  cacheTree(root, tree)
   return {
     rootPath: root,
-    tree: await fsService.buildTree(root),
+    tree,
     archives: config.archives
   }
 }
@@ -110,6 +112,7 @@ async function mountFolder(directory: string): Promise<RootState> {
   const opened = await fsService.openArchive(directory)
   await ensureOnboarding(opened.root)
   const tree = await fsService.buildTree(opened.root)
+  cacheTree(opened.root, tree)
   root = opened.root
   invalidateIndex()
   startWatching()
@@ -136,6 +139,10 @@ export async function unmountArchive(): Promise<RootState> {
   const state: RootState = { rootPath: null, tree: null, archives: config.archives }
   broadcast(IPC.archiveRootChanged, state)
   return state
+}
+
+export async function broadcastCurrentRoot(): Promise<void> {
+  broadcast(IPC.archiveRootChanged, await rootState())
 }
 
 export async function restoreArchive(): Promise<void> {
