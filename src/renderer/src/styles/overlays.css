@@ -104,6 +104,43 @@
   text-transform: uppercase;
 }
 
+.about-hero {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.about-hero__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 10px var(--accent-soft);
+  flex-shrink: 0;
+}
+
+.about-hero__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.about-hero__title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.about-hero__desc {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
 .about-grid {
   display: grid;
   grid-template-columns: 1fr auto;

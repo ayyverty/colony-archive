@@ -22,12 +22,20 @@
 
 .titlebar__brand {
   display: flex;
-  align-items: baseline;
-  gap: 9px;
+  align-items: center;
+  gap: 8px;
   white-space: nowrap;
   font-size: 11px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
+}
+
+.titlebar__icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .titlebar__mark {

@@ -138,10 +138,22 @@ function AboutPanel({ dialog }: { dialog: AboutDialog }) {
   return (
     <div className="dialog" role="dialog" aria-modal="true">
       <div className="dialog__head">
-        <h2 className="dialog__title">Colony archive</h2>
+        <h2 className="dialog__title">RimCodex</h2>
       </div>
       <div className="dialog__body">
-        <div>A local-first Markdown terminal for colony records.</div>
+        <div className="about-hero">
+          <img
+            src="/rimcodex-icon.png"
+            alt="RimCodex Icon"
+            className="about-hero__icon"
+            width={48}
+            height={48}
+          />
+          <div className="about-hero__meta">
+            <div className="about-hero__title">RimCodex</div>
+            <div className="about-hero__desc">A local-first Markdown terminal for colony records.</div>
+          </div>
+        </div>
         <dl className="about-grid">
           <dt>Version</dt>
           <dd>1.0.0</dd>

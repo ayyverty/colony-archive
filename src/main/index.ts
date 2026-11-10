@@ -30,6 +30,7 @@ function createWindow(): BrowserWindow {
     frame: false,
     backgroundColor: '#070a0d',
     title: 'RimCodex',
+    icon: path.join(__dirname, '../renderer/rimcodex-icon.png'),
     webPreferences: {
       preload: path.join(__dirname, '../preload/index.js'),
       nodeIntegration: false,

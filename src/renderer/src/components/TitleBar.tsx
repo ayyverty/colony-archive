@@ -104,14 +104,14 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
     { id: 'unmount', label: 'UNMOUNT ARCHIVE', onSelect: () => void unmountArchive() },
     ...(archives.length > 1
       ? [
-          { section: 'Mounted archives' } as const,
-          ...archives.map((archive) => ({
-            id: `archive:${archive}`,
-            label: `${archive === rootPath ? '● ' : ''}${basename(archive)}`,
-            hint: archive === rootPath ? 'mounted' : 'switch',
-            onSelect: () => void switchArchive(archive)
-          }))
-        ]
+        { section: 'Mounted archives' } as const,
+        ...archives.map((archive) => ({
+          id: `archive:${archive}`,
+          label: `${archive === rootPath ? '● ' : ''}${basename(archive)}`,
+          hint: archive === rootPath ? 'mounted' : 'switch',
+          onSelect: () => void switchArchive(archive)
+        }))
+      ]
       : []),
     'sep',
     { section: 'Workspaces' },
@@ -210,6 +210,13 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
       }}
     >
       <div className="titlebar__brand">
+        <img
+          src="/rimcodex-icon.png"
+          alt=""
+          className="titlebar__icon"
+          width={15}
+          height={15}
+        />
         <span className="titlebar__mark">[RC]</span>
         <span className="titlebar__name">RimCodex</span>
       </div>
