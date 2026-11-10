@@ -17,7 +17,20 @@
   border-bottom: 1px solid var(--line);
   background: var(--bg-1);
   user-select: none;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar__drag {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   -webkit-app-region: drag;
+  pointer-events: auto;
+}
+
+.titlebar > *:not(.titlebar__drag) {
+  position: relative;
+  z-index: 1;
 }
 
 .titlebar__brand {
@@ -28,6 +41,7 @@
   font-size: 11px;
   letter-spacing: 0.24em;
   text-transform: uppercase;
+  pointer-events: none;
 }
 
 .titlebar__icon {
@@ -53,6 +67,7 @@
 .titlebar__sep {
   color: var(--text-faint);
   letter-spacing: 0;
+  pointer-events: none;
 }
 
 .titlebar__folder {
@@ -64,6 +79,7 @@
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 .titlebar__folder--empty {
@@ -72,6 +88,7 @@
 
 .titlebar__spacer {
   flex: 1;
+  pointer-events: none;
 }
 
 .titlebar__actions,

@@ -209,6 +209,7 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
         if (event.target === event.currentTarget) void window.api.windowToggleMaximize()
       }}
     >
+      <div className="titlebar__drag" aria-hidden="true" />
       <div className="titlebar__brand">
         <img
           src="/rimcodex-icon.png"
