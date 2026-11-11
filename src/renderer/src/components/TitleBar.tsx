@@ -116,7 +116,7 @@ export function TitleBar({ resolvedTheme, maximized }: TitleBarProps) {
     'sep',
     { section: 'Workspaces' },
     { id: 'ws-archive', label: `${workspace === 'archive' ? '● ' : ''}ARCHIVE.EXE`, hint: 'F1', onSelect: () => setWorkspace('archive') },
-    { id: 'ws-index', label: `${workspace === 'index' ? '● ' : ''}INDEXER.SVC`, hint: 'F2', onSelect: () => setWorkspace('index') },
+    { id: 'ws-search', label: `${workspace === 'search' ? '● ' : ''}Search`, hint: 'F2', onSelect: () => setWorkspace('search') },
     { id: 'ws-diagnostics', label: `${workspace === 'diagnostics' ? '● ' : ''}DIAGNOSTICS.SYS`, hint: 'F3', onSelect: () => setWorkspace('diagnostics') },
     { id: 'ws-graph', label: `${workspace === 'graph' ? '● ' : ''}GRAPH.SVC`, hint: 'F4', onSelect: () => setWorkspace('graph') },
     { id: 'ws-manual', label: `${workspace === 'manual' ? '● ' : ''}MANUAL.SYS`, hint: 'F5', onSelect: () => setWorkspace('manual') },

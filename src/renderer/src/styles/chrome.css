@@ -1,8 +1,22 @@
 .app {
-  display: grid;
-  grid-template-rows: var(--titlebar-h) minmax(0, 1fr) var(--statusbar-h);
+  display: flex;
+  flex-direction: column;
   height: 100%;
   background: var(--bg-0);
+}
+
+.app > .titlebar {
+  flex: none;
+}
+
+.app > .workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.app > .console,
+.app > .statusbar {
+  flex: none;
 }
 
 /* ── Title bar ─────────────────────────────────────────────────────────── */

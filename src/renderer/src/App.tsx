@@ -35,6 +35,11 @@ const ProfilePanel = lazy(() => import('./components/panels/ProfilePanel').then(
 const MountSequence = lazy(() => import('./components/MountSequence').then((m) => ({ default: m.MountSequence })))
 const ColonyBanner = lazy(() => import('./components/ColonyBanner').then((m) => ({ default: m.ColonyBanner })))
 const TemplatePickerDialog = lazy(() => import('./components/TemplatePickerDialog').then((m) => ({ default: m.TemplatePickerDialog })))
+const BriefingScreen = lazy(() => import('./components/BriefingScreen').then((m) => ({ default: m.BriefingScreen })))
+const SettingsScreen = lazy(() => import('./components/SettingsScreen').then((m) => ({ default: m.SettingsScreen })))
+const WorkspaceBar = lazy(() => import('./components/WorkspaceBar').then((m) => ({ default: m.WorkspaceBar })))
+const CommandBar = lazy(() => import('./components/CommandBar').then((m) => ({ default: m.CommandBar })))
+const Inspector = lazy(() => import('./components/Inspector').then((m) => ({ default: m.Inspector })))
 import { SUBSYSTEMS } from './lib/subsystems'
 
 interface PanelMeta {
@@ -127,7 +132,12 @@ export default function App() {
           setStartupReady(true)
         }
 
-        const rootState = await call(window.api.listTree())
+        let rootState = await call(window.api.listTree())
+        const rootDeadline = Date.now() + 10000
+        while (!cancelled && !rootState.rootPath && Date.now() < rootDeadline) {
+          await new Promise((resolve) => window.setTimeout(resolve, 100))
+          rootState = await call(window.api.listTree())
+        }
         if (cancelled) return
         useArchiveStore.getState().setRoot(rootState)
         setStartupReady(true)
@@ -284,7 +294,7 @@ export default function App() {
           state.setWorkspace('archive')
           break
         case 'workspace-index':
-          state.setWorkspace('index')
+          state.setWorkspace('search')
           break
         case 'workspace-diagnostics':
           state.setWorkspace('diagnostics')
@@ -376,7 +386,7 @@ export default function App() {
         state.setWorkspace('archive')
       } else if (event.key === 'F2') {
         event.preventDefault()
-        state.setWorkspace('index')
+        state.setWorkspace('search')
       } else if (event.key === 'F3') {
         event.preventDefault()
         state.setWorkspace('diagnostics')
@@ -454,11 +464,14 @@ export default function App() {
   const openPanels = PANEL_ORDER.filter((id) => panels[id as keyof typeof panels])
 
   const workspaceView = (() => {
-    if (workspace === 'index') return <Suspense fallback={null}><IndexScreen /></Suspense>
+    if (workspace === 'home') return <Suspense fallback={null}><BriefingScreen /></Suspense>
+    if (workspace === 'search') return <Suspense fallback={null}><IndexScreen /></Suspense>
     if (workspace === 'diagnostics') return <Suspense fallback={null}><DiagnosticsScreen /></Suspense>
     if (workspace === 'graph') return <Suspense fallback={null}><GraphScreen /></Suspense>
     if (workspace === 'timeline') return <Suspense fallback={null}><TimelineScreen /></Suspense>
     if (workspace === 'manual') return <Suspense fallback={null}><OperatorManual /></Suspense>
+    if (workspace === 'settings') return <Suspense fallback={null}><SettingsScreen /></Suspense>
+    if (workspace === 'inbox') return <Suspense fallback={null}><InboxPanel /></Suspense>
     if (!rootPath) return <Suspense fallback={null}><IdleScreen /></Suspense>
     return (
       <>
@@ -476,6 +489,8 @@ export default function App() {
     <div className={`app ${focusMode ? 'app--focus' : ''}`}>
       <TitleBar resolvedTheme={resolvedTheme} maximized={maximized} />
       <Suspense fallback={null}><ColonyBanner /></Suspense>
+      <Suspense fallback={null}><WorkspaceBar /></Suspense>
+      <Suspense fallback={null}><CommandBar /></Suspense>
 
       <div className="workspace">
         {workspace === 'archive' ? (
@@ -503,6 +518,7 @@ export default function App() {
         ))
       ) : null}
 
+      <Suspense fallback={null}><Inspector /></Suspense>
       <CommandPalette />
       <ContextMenu />
       <DialogHost />

@@ -1,7 +1,7 @@
 /* ── Extended chrome ───────────────────────────────────────────────────── */
 
 .app {
-  grid-template-rows: var(--titlebar-h) minmax(0, 1fr) auto var(--statusbar-h);
+  /* Layout is handled by chrome.css. */
 }
 
 .app--focus {
@@ -2974,6 +2974,319 @@
 
 .tag-chip .info-tip {
   display: inline;
+}
+
+/* ── Workspace bar ─────────────────────────────────────────────────────── */
+
+.workspace-bar {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  align-items: center;
+  height: 34px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-1);
+  overflow-x: auto;
+}
+
+.workspace-bar__nav {
+  display: flex;
+  gap: 2px;
+  margin-right: 8px;
+}
+
+.workspace-bar__nav-button {
+  width: 24px;
+  height: 22px;
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+.workspace-bar__nav-button:hover:not(:disabled) {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+
+.workspace-bar__nav-button:disabled {
+  opacity: 0.35;
+}
+
+.workspace-bar__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  height: 26px;
+  min-width: 74px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  color: var(--text-faint);
+  text-align: left;
+}
+
+.workspace-bar__item:hover {
+  color: var(--text-dim);
+  background: var(--bg-hover);
+}
+
+.workspace-bar__item--active {
+  border-color: var(--accent-dim);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.workspace-bar__label {
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workspace-bar__code {
+  font-size: 7.5px;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+/* ── Command bar ───────────────────────────────────────────────────────── */
+
+.command-bar {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  z-index: 20;
+}
+
+.command-bar__prompt {
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-shadow: 0 0 3px var(--accent-glow);
+}
+
+.command-bar__input {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 0 8px;
+  outline: none;
+}
+
+.command-bar__input:focus {
+  border-color: var(--accent-dim);
+}
+
+.command-bar__hint {
+  color: var(--text-faint);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.command-bar__results {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 34px;
+  z-index: 240;
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.command-bar__result {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 10px;
+  color: var(--text-dim);
+  font-size: 10.5px;
+  text-align: left;
+}
+
+.command-bar__result--active,
+.command-bar__result:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.command-bar__result-label {
+  color: var(--text);
+}
+
+.command-bar__result-hint {
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+/* ── Inspector ─────────────────────────────────────────────────────────── */
+
+.inspector {
+  position: fixed;
+  top: 104px;
+  right: 12px;
+  z-index: 230;
+  width: 320px;
+  max-height: calc(100vh - 130px);
+  border: 1px solid var(--line-strong);
+  background: var(--bg-1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inspector__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--accent-dim);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.inspector__close {
+  color: var(--text-faint);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.inspector__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inspector__tab {
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inspector__tab--active {
+  border-color: var(--accent-dim);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.inspector__body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px;
+}
+
+/* ── Briefing ──────────────────────────────────────────────────────────── */
+
+.screen--briefing {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.briefing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.briefing-section {
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  padding: 10px 12px;
+}
+
+.briefing-section h2 {
+  margin: 0 0 8px;
+  color: var(--accent-dim);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.briefing-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.briefing-list button {
+  padding: 4px 6px;
+  border: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 10px;
+  text-align: left;
+}
+
+.briefing-list button:hover {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+
+/* ── Settings ──────────────────────────────────────────────────────────── */
+
+.screen--settings {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-section {
+  border: 1px solid var(--line);
+  background: var(--bg-1);
+  padding: 10px 12px;
+}
+
+.settings-section h2 {
+  margin: 0 0 8px;
+  color: var(--accent-dim);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-row__label {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+.settings-row__value {
+  color: var(--text-faint);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* ── Phosphor display ──────────────────────────────────────────────────── */

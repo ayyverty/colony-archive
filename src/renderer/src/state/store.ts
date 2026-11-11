@@ -129,6 +129,10 @@ export interface ArchiveStore {
   focusMode: boolean
   workspace: WorkspaceId
   unsealed: Record<string, boolean>
+  navigationHistory: string[]
+  historyIndex: number
+  inspectorOpen: boolean
+  inspectorTab: 'details' | 'backlinks' | 'see-also' | 'history' | 'metadata'
   focusedPane: 'tree' | 'editor' | 'preview' | null
   tabs: string[]
   mounting: boolean
@@ -185,7 +189,7 @@ export interface ArchiveStore {
   refreshTree: () => Promise<void>
   refreshIndex: () => Promise<void>
   scheduleIndexRefresh: () => void
-  selectPath: (path: string) => Promise<void>
+  selectPath: (path: string, recordHistory?: boolean) => Promise<void>
   clearSelection: () => void
   updateDraft: (path: string, content: string) => void
   saveSelected: () => Promise<void>
@@ -205,6 +209,12 @@ export interface ArchiveStore {
   toggleFocusMode: () => void
   setSeeAlsoOpen: (open: boolean) => void
   setFocusedPane: (pane: 'tree' | 'editor' | 'preview' | null) => void
+  navigateTo: (path: string) => Promise<void>
+  goBack: () => Promise<void>
+  goForward: () => Promise<void>
+  openInspector: (tab?: 'details' | 'backlinks' | 'see-also' | 'history' | 'metadata') => void
+  closeInspector: () => void
+  toggleInspector: () => void
   setTechLevel: (level: 'neolithic' | 'industrial' | 'spacer' | 'ultratech') => Promise<void>
   syncArchiveDate: () => Promise<void>
   setArchiveDate: (date: string) => Promise<void>
@@ -409,6 +419,10 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
   workspace: 'archive',
   unsealed: {},
   focusedPane: null,
+  navigationHistory: [],
+  historyIndex: -1,
+  inspectorOpen: false,
+  inspectorTab: 'details',
   tabs: [],
   mounting: false,
   mountLines: [],
@@ -577,7 +591,7 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
     }, 500)
   },
 
-  selectPath: async (path) => {
+  selectPath: async (path, recordHistory = true) => {
     const tree = get().tree
     const unsealed = get().unsealed
     const prefixes = []
@@ -608,6 +622,13 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
     const state = get()
     if (state.selected === path) {
       set({ paletteOpen: false })
+      if (recordHistory) {
+        const history = get().navigationHistory
+        const index = get().historyIndex
+        const next = history.slice(0, index + 1)
+        if (next[next.length - 1] !== path) next.push(path)
+        set({ navigationHistory: next, historyIndex: next.length - 1 })
+      }
       return
     }
 
@@ -619,6 +640,20 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
         expanded: expandFor(snapshot.expanded, path),
         tabs: snapshot.tabs.includes(path) ? snapshot.tabs : [...snapshot.tabs, path]
       }))
+      if (recordHistory) {
+        const history = get().navigationHistory
+        const index = get().historyIndex
+        const next = history.slice(0, index + 1)
+        if (next[next.length - 1] !== path) next.push(path)
+        set({ navigationHistory: next, historyIndex: next.length - 1 })
+      }
+      if (recordHistory) {
+        const history = get().navigationHistory
+        const index = get().historyIndex
+        const next = history.slice(0, index + 1)
+        if (next[next.length - 1] !== path) next.push(path)
+        set({ navigationHistory: next, historyIndex: next.length - 1 })
+      }
       get().log(`opened ${path}`, 'info')
       return
     }
@@ -786,6 +821,34 @@ export const useArchiveStore = create<ArchiveStore>()((set, get) => ({
   setSeeAlsoOpen: (open) => set({ seeAlsoOpen: open }),
 
   setFocusedPane: (pane) => set({ focusedPane: pane }),
+
+  navigateTo: async (path) => {
+    await get().selectPath(path, true)
+  },
+
+  goBack: async () => {
+    const state = get()
+    if (state.historyIndex <= 0) return
+    const nextIndex = state.historyIndex - 1
+    const nextPath = state.navigationHistory[nextIndex]
+    if (!nextPath) return
+    set({ historyIndex: nextIndex })
+    await get().selectPath(nextPath, false)
+  },
+
+  goForward: async () => {
+    const state = get()
+    if (state.historyIndex >= state.navigationHistory.length - 1) return
+    const nextIndex = state.historyIndex + 1
+    const nextPath = state.navigationHistory[nextIndex]
+    if (!nextPath) return
+    set({ historyIndex: nextIndex })
+    await get().selectPath(nextPath, false)
+  },
+
+  openInspector: (tab = 'details') => set({ inspectorOpen: true, inspectorTab: tab }),
+  closeInspector: () => set({ inspectorOpen: false }),
+  toggleInspector: () => set((state) => ({ inspectorOpen: !state.inspectorOpen })),
 
   setWorkspace: (workspace) => set({ workspace }),
 

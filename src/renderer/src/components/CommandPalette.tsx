@@ -66,7 +66,7 @@ export function CommandPalette() {
       ['mount', 'Mount another archive…', 'Ctrl O', () => void state.openFolder()],
       ['unmount', 'Unmount archive', '', () => void state.unmountArchive()],
       ['workspace-archive', 'Switch to ARCHIVE.EXE', 'F1', () => state.setWorkspace('archive')],
-      ['workspace-index', 'Switch to INDEXER.SVC', 'F2', () => state.setWorkspace('index')],
+      ['workspace-search', 'Switch to Search', 'F2', () => state.setWorkspace('search')],
       ['workspace-diagnostics', 'Switch to DIAGNOSTICS.SYS', 'F3', () => state.setWorkspace('diagnostics')],
       ['workspace-graph', 'Switch to GRAPH.SVC', 'F4', () => state.setWorkspace('graph')],
       ['workspace-manual', 'Switch to MANUAL.SYS', 'F5', () => state.setWorkspace('manual')],
